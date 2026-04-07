@@ -56,15 +56,14 @@ export const getWordCount = (text) => text.trim() ? text.trim().split(/\s+/).len
 // src/components/ui/Modal.tsx
 import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
-import { cn } from "./lib/utils";
 
-// Props for Modal
-  isOpen;
-  onClose;
-  title?;
-  
-  size?;
-  showCloseButton?;
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title?: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  showCloseButton?: boolean;
+  children: React.ReactNode;
 }
 
 const sizes = {
@@ -74,7 +73,7 @@ const sizes = {
   xl: "max-w-4xl"
 };
 
-export const Modal = ({ isOpen, onClose, title, children, size = "lg", showCloseButton = true } => (
+export const Modal = ({ isOpen, onClose, title, children, size = "lg", showCloseButton = true }: ModalProps) => (
   <AnimatePresence>
     {isOpen && (
       <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -103,19 +102,18 @@ export const Modal = ({ isOpen, onClose, title, children, size = "lg", showClose
 
 // src/components/ui/ProgressBar.tsx
 import { motion } from "motion/react";
-import { cn } from "./lib/utils";
 
-// Props for ProgressBar
-  current;
-  target;
-  label?;
-  showPercentage?;
-  className?;
+interface ProgressBarProps {
+  current: number;
+  target: number;
+  label?: string;
+  showPercentage?: boolean;
+  className?: string;
 }
 
-export const ProgressBar = ({ current, target, label, showPercentage = true, className } => {
+export const ProgressBar = ({ current, target, label, showPercentage = true, className }: ProgressBarProps) => {
   const percentage = target > 0 ? Math.min(100, (current / target) * 100) : 0;
-  
+
   return (
     <div className={cn("space-y-1", className)}>
       {(label || showPercentage) && (
@@ -136,22 +134,21 @@ export const ProgressBar = ({ current, target, label, showPercentage = true, cla
 };
 
 // src/components/ui/Tabs.tsx
-import { cn } from "./lib/utils";
 import { motion } from "motion/react";
 
 interface Tab {
-  id;
-  label;
+  id: string;
+  label: string;
 }
 
-// Props for Tabs
+interface TabsProps {
   tabs: Tab[];
-  activeTab;
-  onChange;
-  className?;
+  activeTab: string;
+  onChange: (id: string) => void;
+  className?: string;
 }
 
-export const Tabs = ({ tabs, activeTab, onChange, className } => (
+export const Tabs = ({ tabs, activeTab, onChange, className }: TabsProps) => (
   <div className={cn("flex border-b border-ink/5 overflow-x-auto custom-scrollbar shrink-0", className)}>
     {tabs.map((tab) => (
       <button
