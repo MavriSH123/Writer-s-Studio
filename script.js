@@ -3,13 +3,13 @@ export const STORAGE_KEYS = {
   APP_STATE: "writers_studio_app_state",
   ACTIVE_PROJECT: "writers_studio_app_state_active_project",
   ACTIVE_TAB: "writers_studio_app_state_active_tab"
-} as const;
+};
 
 export const DB_CONFIG = {
   NAME: "WritersStudioDB",
   STORE: "appState",
   VERSION: 1
-} as const;
+};
 
 export const CATEGORIES = {
   characters: {
@@ -24,44 +24,47 @@ export const CATEGORIES = {
     importance: ["low", "medium", "high"],
     importanceLabels: { low: "Низкая", medium: "Средняя", high: "Высокая" }
   }
-} as const;
+};
 
 // src/lib/utils.ts
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
+export const cn = (...inputs) => twMerge(clsx(inputs));
 
 export const generateId = () => Math.random().toString(36).substr(2, 9);
 
-export const calculateNorm = (project: Project) => {
+export const calculateNorm = (project) => {
   if (!project.deadline) return 0;
   const totalWritten = project.wordLogs.reduce((acc, l) => acc + l.count, 0);
   const remaining = Math.max(0, project.totalGoal - totalWritten);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const deadlineDate = parseISO(project.deadline);
+  const deadlineDate = new Date(project.deadline);
   deadlineDate.setHours(0, 0, 0, 0);
   const diffDays = Math.ceil((deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) + 1;
   return diffDays <= 0 ? remaining : Math.ceil(remaining / diffDays);
 };
 
-export const getTodayKey = () => format(new Date(), "yyyy-MM-dd");
+export const getTodayKey = () => {
+  const d = new Date();
+  return d.toISOString().split('T')[0];
+};
 
-export const getWordCount = (text: string) => text.trim() ? text.trim().split(/\s+/).length : 0;
+export const getWordCount = (text) => text.trim() ? text.trim().split(/\s+/).length : 0;
 
 // src/components/ui/Modal.tsx
 import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "./lib/utils";
 
-interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title?: string;
-  children: React.ReactNode;
-  size?: "sm" | "md" | "lg" | "xl";
-  showCloseButton?: boolean;
+// Props for Modal
+  isOpen;
+  onClose;
+  title?;
+  
+  size?;
+  showCloseButton?;
 }
 
 const sizes = {
@@ -71,7 +74,7 @@ const sizes = {
   xl: "max-w-4xl"
 };
 
-export const Modal = ({ isOpen, onClose, title, children, size = "lg", showCloseButton = true }: ModalProps) => (
+export const Modal = ({ isOpen, onClose, title, children, size = "lg", showCloseButton = true } => (
   <AnimatePresence>
     {isOpen && (
       <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -100,17 +103,17 @@ export const Modal = ({ isOpen, onClose, title, children, size = "lg", showClose
 
 // src/components/ui/ProgressBar.tsx
 import { motion } from "motion/react";
-import { cn } from "@/lib/utils";
+import { cn } from "./lib/utils";
 
-interface ProgressBarProps {
-  current: number;
-  target: number;
-  label?: string;
-  showPercentage?: boolean;
-  className?: string;
+// Props for ProgressBar
+  current;
+  target;
+  label?;
+  showPercentage?;
+  className?;
 }
 
-export const ProgressBar = ({ current, target, label, showPercentage = true, className }: ProgressBarProps) => {
+export const ProgressBar = ({ current, target, label, showPercentage = true, className } => {
   const percentage = target > 0 ? Math.min(100, (current / target) * 100) : 0;
   
   return (
@@ -133,22 +136,22 @@ export const ProgressBar = ({ current, target, label, showPercentage = true, cla
 };
 
 // src/components/ui/Tabs.tsx
-import { cn } from "@/lib/utils";
+import { cn } from "./lib/utils";
 import { motion } from "motion/react";
 
 interface Tab {
-  id: string;
-  label: string;
+  id;
+  label;
 }
 
-interface TabsProps {
+// Props for Tabs
   tabs: Tab[];
-  activeTab: string;
-  onChange: (id: string) => void;
-  className?: string;
+  activeTab;
+  onChange;
+  className?;
 }
 
-export const Tabs = ({ tabs, activeTab, onChange, className }: TabsProps) => (
+export const Tabs = ({ tabs, activeTab, onChange, className } => (
   <div className={cn("flex border-b border-ink/5 overflow-x-auto custom-scrollbar shrink-0", className)}>
     {tabs.map((tab) => (
       <button
@@ -168,16 +171,16 @@ export const Tabs = ({ tabs, activeTab, onChange, className }: TabsProps) => (
 // src/components/WordCounter.tsx
 import { useState } from "react";
 import { motion } from "motion/react";
-import { cn } from "@/lib/utils";
-import { calculateNorm, getTodayKey } from "@/lib/utils";
+import { cn } from "./lib/utils";
+import { calculateNorm, getTodayKey } from "./lib/utils";
 
-interface WordCounterProps {
+// Props for WordCounter
   project: Project;
-  onAddWords: (count: number) => void;
-  className?: string;
+  onAddWords;
+  className?;
 }
 
-export const WordCounter = ({ project, onAddWords, className }: WordCounterProps) => {
+export const WordCounter = ({ project, onAddWords, className } => {
   const [count, setCount] = useState("");
   const dailyNorm = calculateNorm(project);
   const todayWords = project.wordLogs.find((l) => l.date === getTodayKey())?.count || 0;
@@ -215,18 +218,18 @@ export const WordCounter = ({ project, onAddWords, className }: WordCounterProps
 // src/components/CharacterForm.tsx
 import { useState } from "react";
 import { MarkdownEditor } from "./MarkdownEditor";
-import { cn } from "@/lib/utils";
-import { CATEGORIES } from "@/lib/constants";
+import { cn } from "./lib/utils";
+import { CATEGORIES } from "./lib/constants";
 
-interface CharacterFormProps {
+// Props for CharacterForm
   initialData?: Character;
   characters?: Character[];
-  onSubmit: (data: Partial<Character>) => void;
-  onCancel: () => void;
+  onSubmit;
+  onCancel;
 }
 
-export const CharacterForm = ({ initialData, characters = [], onSubmit, onCancel }: CharacterFormProps) => {
-  const [formData, setFormData] = useState<Partial<Character>>(initialData || { relationships: [] });
+export const CharacterForm = ({ initialData, characters = [], onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState(initialData || { relationships: [] });
   const [activeTab, setActiveTab] = useState("general");
   const [relTarget, setRelTarget] = useState("");
   const [relType, setRelType] = useState("");
@@ -250,7 +253,7 @@ export const CharacterForm = ({ initialData, characters = [], onSubmit, onCancel
     setRelType("");
   };
   
-  const removeRelationship = (index: number) => {
+  const removeRelationship = (index) => {
     setFormData(prev => ({
       ...prev,
       relationships: (prev.relationships || []).filter((_, i) => i !== index)
@@ -342,8 +345,8 @@ export const CharacterForm = ({ initialData, characters = [], onSubmit, onCancel
 
 // src/hooks/useProjectStorage.ts
 import { useState, useEffect, useCallback } from "react";
-import { loadState, saveState } from "@/lib/indexedDB";
-import { INITIAL_APP_STATE } from "@/lib/constants";
+import { loadState, saveState } from "./lib/indexedDB";
+import { INITIAL_APP_STATE } from "./lib/constants";
 
 export const useProjectStorage = () => {
   const [appState, setAppState] = useState(INITIAL_APP_STATE);
@@ -396,9 +399,9 @@ export const useProjectStorage = () => {
 // src/hooks/useAutoSave.ts
 import { useEffect, useRef, useState } from "react";
 
-export const useAutoSave = (value: string, onSave: (value: string) => void, delay = 3000) => {
-  const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
-  const timeoutRef = useRef<NodeJS.Timeout>();
+export const useAutoSave = (value, onSave, delay = 3000) => {
+  const [status, setStatus] = useState("saved");
+  const timeoutRef = useRef();
   
   useEffect(() => {
     setStatus("unsaved");
@@ -455,3 +458,107 @@ export const CharacterCard = ({ character, onEdit, onDelete, onPreview, onShowRe
     </div>
   </motion.div>
 );
+
+// src/App.tsx - Главный компонент приложения
+import { useState } from "react";
+import { Book, Users, Globe, Clock, PenTool, Settings, Sparkles } from "lucide-react";
+import { motion } from "motion/react";
+import { useProjectStorage } from "./hooks/useProjectStorage";
+import { STORAGE_KEYS, INITIAL_APP_STATE } from "./lib/constants";
+
+const TABS = [
+  { id: "dashboard", label: "Обзор", icon: Book },
+  { id: "manuscript", label: "Рукопись", icon: PenTool },
+  { id: "characters", label: "Персонажи", icon: Users },
+  { id: "worldbuilding", label: "Мир", icon: Globe },
+  { id: "timeline", label: "Таймлайн", icon: Clock },
+  { id: "ai-assistant", label: "AI Помощник", icon: Sparkles },
+  { id: "settings", label: "Настройки", icon: Settings }
+];
+
+export const App = () => {
+  const { appState, setAppState, isLoading, updateActiveProject } = useProjectStorage();
+  const [activeTab, setActiveTab] = useState("dashboard");
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-paper flex items-center justify-center">
+        <div className="text-sepia text-xl font-serif">Загрузка...</div>
+      </div>
+    );
+  }
+
+  const activeProject = appState.projects.find(p => p.id === appState.activeProjectId);
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "dashboard":
+        return (
+          <div className="p-6 space-y-6">
+            <h2 className="text-3xl font-serif text-ink">Добро пожаловать в Студию Писателя</h2>
+            {activeProject ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-card p-6 rounded-lg border border-ink/5">
+                  <h3 className="text-lg font-serif mb-4">{activeProject.title}</h3>
+                  <p className="text-sm opacity-70">Цель: {activeProject.totalGoal.toLocaleString()} слов</p>
+                </div>
+              </div>
+            ) : (
+              <p className="opacity-70">Создайте новый проект, чтобы начать писать.</p>
+            )}
+          </div>
+        );
+      default:
+        return (
+          <div className="p-6">
+            <h2 className="text-2xl font-serif mb-4">{TABS.find(t => t.id === activeTab)?.label}</h2>
+            <p className="opacity-70">Раздел в разработке...</p>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-paper text-ink flex">
+      {/* Боковая панель */}
+      <aside className="w-64 bg-card border-r border-ink/5 flex flex-col">
+        <div className="p-6 border-b border-ink/5">
+          <h1 className="text-xl font-serif text-sepia">Студия Писателя</h1>
+          <p className="text-xs opacity-50 mt-1">v.1.0</p>
+        </div>
+        <nav className="flex-1 p-4 space-y-1">
+          {TABS.map(tab => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-colors ${
+                  activeTab === tab.id
+                    ? "bg-sepia/10 text-sepia font-medium"
+                    : "opacity-70 hover:opacity-100 hover:bg-ink/5"
+                }`}
+              >
+                <Icon size={18} />
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
+      </aside>
+
+      {/* Основной контент */}
+      <main className="flex-1 overflow-auto">
+        {renderContent()}
+      </main>
+    </div>
+  );
+};
+
+// Точка входа - инициализация React
+import ReactDOM from "react-dom/client";
+
+const root = document.getElementById("root");
+if (root) {
+  ReactDOM.createRoot(root).render(<App />);
+}
